@@ -6,6 +6,7 @@ function auth(req,res,next){
     if(!token) return res.status(401).send('Access denied. No token provided.');
 
     try {
+        // decoded variable stores payload information
         const decoded = jwt.verify(token,config.get('jwtPrivateKey'));
         req.user = decoded;
         next();
