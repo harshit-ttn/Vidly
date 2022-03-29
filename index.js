@@ -15,9 +15,19 @@ const auth = require('./routes/auth');
 const express = require('express');
 const app = express();
 
-process.on('uncaughtException',(ex) =>{
-  console.log('WE GOT AN UNCAUGHT EXCEPTION');
+// process.on('uncaughtException',(ex) =>{
+//   console.log('WE GOT AN UNCAUGHT EXCEPTION');
+//   winston.error(ex.message,ex);
+//   process.exit(1);
+// });
+
+winston.handleExceptions(new winston.transports.File({ filename: 'uncaughtExceptions.log'}));
+
+
+process.on('unhandledRejection',(ex) =>{
+  console.log('WE GOT AN UNCAUGHT REJECTION');
   winston.error(ex.message,ex);
+  process.exit(1);
 });
 
 winston.add(winston.transports.File,{ filename: 'logfile.log' });
@@ -26,7 +36,10 @@ winston.add(winston.transports.MongoDB, { db: 'mongodb://localhost/vidly',
 });
 
 // this error is thrown outside the request processing pipeline
-throw new Error('Something failed during startup.');
+
+const p = Promise.reject(new Error('Something failed misrably!'));
+
+
 
 if(!config.get('jwtPrivateKey')){
   console.error('FATAL ERROR: jwtPrivateKey is not defined.');
